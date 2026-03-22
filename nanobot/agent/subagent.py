@@ -33,6 +33,7 @@ class SubagentManager:
         web_proxy: str | None = None,
         exec_config: "ExecToolConfig | None" = None,
         restrict_to_workspace: bool = False,
+        network_security_config: Any | None = None,
     ):
         from nanobot.config.schema import ExecToolConfig, WebSearchConfig
 
@@ -44,6 +45,7 @@ class SubagentManager:
         self.web_proxy = web_proxy
         self.exec_config = exec_config or ExecToolConfig()
         self.restrict_to_workspace = restrict_to_workspace
+        self.network_security_config = network_security_config
         self._running_tasks: dict[str, asyncio.Task[None]] = {}
         self._session_tasks: dict[str, set[str]] = {}  # session_key -> {task_id, ...}
 
@@ -103,9 +105,13 @@ class SubagentManager:
                 timeout=self.exec_config.timeout,
                 restrict_to_workspace=self.restrict_to_workspace,
                 path_append=self.exec_config.path_append,
+                network_security_config=self.network_security_config,
             ))
             tools.register(WebSearchTool(config=self.web_search_config, proxy=self.web_proxy))
-            tools.register(WebFetchTool(proxy=self.web_proxy))
+            tools.register(WebFetchTool(
+                proxy=self.web_proxy,
+                network_security_config=self.network_security_config,
+            ))
             
             system_prompt = self._build_subagent_prompt()
             messages: list[dict[str, Any]] = [

@@ -51,10 +51,10 @@ def _validate_url(url: str) -> tuple[bool, str]:
         return False, str(e)
 
 
-def _validate_url_safe(url: str) -> tuple[bool, str]:
+def _validate_url_safe(url: str, *, network_security_config: Any | None = None) -> tuple[bool, str]:
     """Validate URL with SSRF protection: scheme, domain, and resolved IP check."""
     from nanobot.security.network import validate_url_target
-    return validate_url_target(url)
+    return validate_url_target(url, network_security_config=network_security_config)
 
 
 def _format_results(query: str, items: list[dict[str, Any]], n: int) -> str:
@@ -227,13 +227,19 @@ class WebFetchTool(Tool):
         "required": ["url"],
     }
 
-    def __init__(self, max_chars: int = 50000, proxy: str | None = None):
+    def __init__(
+        self,
+        max_chars: int = 50000,
+        proxy: str | None = None,
+        network_security_config: Any | None = None,
+    ):
         self.max_chars = max_chars
         self.proxy = proxy
+        self.network_security_config = network_security_config
 
     async def execute(self, url: str, extractMode: str = "markdown", maxChars: int | None = None, **kwargs: Any) -> str:
         max_chars = maxChars or self.max_chars
-        is_valid, error_msg = _validate_url_safe(url)
+        is_valid, error_msg = _validate_url_safe(url, network_security_config=self.network_security_config)
         if not is_valid:
             return json.dumps({"error": f"URL validation failed: {error_msg}", "url": url}, ensure_ascii=False)
 
@@ -293,7 +299,10 @@ class WebFetchTool(Tool):
                 r.raise_for_status()
 
             from nanobot.security.network import validate_resolved_url
-            redir_ok, redir_err = validate_resolved_url(str(r.url))
+            redir_ok, redir_err = validate_resolved_url(
+                str(r.url),
+                network_security_config=self.network_security_config,
+            )
             if not redir_ok:
                 return json.dumps({"error": f"Redirect blocked: {redir_err}", "url": url}, ensure_ascii=False)
 

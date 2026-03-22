@@ -130,6 +130,14 @@ class ExecToolConfig(Base):
     path_append: str = ""
 
 
+class NetworkSecurityConfig(Base):
+    """Network security policy for tools that may access URLs."""
+
+    allow_private_network: bool = False
+    allowed_private_cidrs: list[str] = Field(default_factory=list)
+    allowed_private_hosts: list[str] = Field(default_factory=list)
+
+
 class MCPServerConfig(Base):
     """MCP server connection configuration (stdio or HTTP)."""
 
@@ -142,12 +150,14 @@ class MCPServerConfig(Base):
     tool_timeout: int = 30  # seconds before a tool call is cancelled
     enabled_tools: list[str] = Field(default_factory=lambda: ["*"])  # Only register these tools; accepts raw MCP names or wrapped mcp_<server>_<tool> names; ["*"] = all tools; [] = no tools
 
+
 class ToolsConfig(Base):
     """Tools configuration."""
 
     web: WebToolsConfig = Field(default_factory=WebToolsConfig)
     exec: ExecToolConfig = Field(default_factory=ExecToolConfig)
     restrict_to_workspace: bool = False  # If true, restrict all tool access to workspace directory
+    network_security: NetworkSecurityConfig = Field(default_factory=NetworkSecurityConfig)
     mcp_servers: dict[str, MCPServerConfig] = Field(default_factory=dict)
 
 
