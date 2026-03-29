@@ -69,6 +69,7 @@ class AgentLoop:
         channels_config: ChannelsConfig | None = None,
         network_security_config: Any | None = None,
         timezone: str | None = None,
+        consolidation_max_tokens: int = 16384,
     ):
         from nanobot.config.schema import ExecToolConfig, WebSearchConfig
 
@@ -125,7 +126,7 @@ class AgentLoop:
             context_window_tokens=context_window_tokens,
             build_messages=self.context.build_messages,
             get_tool_definitions=self.tools.get_definitions,
-            max_completion_tokens=provider.generation.max_tokens,
+            max_completion_tokens=max(consolidation_max_tokens, provider.generation.max_tokens),
         )
         self._register_default_tools()
         self.commands = CommandRouter()

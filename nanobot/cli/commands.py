@@ -551,6 +551,7 @@ def gateway(
         channels_config=config.channels,
         network_security_config=config.tools.network_security,
         timezone=config.agents.defaults.timezone,
+        consolidation_max_tokens=config.agents.defaults.consolidation_max_tokens,
     )
 
     # Set cron callback (needs agent)
@@ -757,6 +758,7 @@ def agent(
         channels_config=config.channels,
         network_security_config=config.tools.network_security,
         timezone=config.agents.defaults.timezone,
+        consolidation_max_tokens=config.agents.defaults.consolidation_max_tokens,
     )
 
     # Shared reference for progress callbacks

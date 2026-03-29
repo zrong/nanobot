@@ -89,7 +89,13 @@ class MemoryStore:
         return ""
 
     def write_long_term(self, content: str) -> None:
-        self.memory_file.write_text(content, encoding="utf-8")
+        # Atomic write: temp file + replace, keeping a .bak of the previous version
+        if self.memory_file.exists():
+            backup = self.memory_dir / "MEMORY.md.bak"
+            self.memory_file.replace(backup)
+        tmp = self.memory_dir / "MEMORY.md.tmp"
+        tmp.write_text(content, encoding="utf-8")
+        tmp.replace(self.memory_file)
 
     def append_history(self, entry: str) -> None:
         with open(self.history_file, "a", encoding="utf-8") as f:

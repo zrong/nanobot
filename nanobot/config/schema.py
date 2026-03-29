@@ -42,6 +42,7 @@ class AgentDefaults(Base):
     max_tool_iterations: int = 40
     reasoning_effort: str | None = None  # low / medium / high - enables LLM thinking mode
     timezone: str = "UTC"  # IANA timezone, e.g. "Asia/Shanghai", "America/New_York"
+    consolidation_max_tokens: int = 16384  # Max tokens for memory consolidation output
 
 
 class AgentsConfig(Base):
